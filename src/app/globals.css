@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* `dark:` utilities apply when <html> has the "dark" class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic colour tokens — light theme */
+:root {
+  --page: #eef2f7;
+  --card: #ffffff;
+  --card-2: #f1f5f9;
+  --fg: #0f172a;
+  --muted: #475569;
+  --subtle: #7c8a9e;
+  --line: #dde4ee;
+  --accent: #2a78d6;
+  /* Issue status colours (validated for contrast & colour-blind safety) */
+  --st-reported: #eda100;
+  --st-progress: #2a78d6;
+  --st-resolved: #0ca30c;
+  color-scheme: light;
+}
+
+/* Dark theme (default): navy command-centre look */
+.dark {
+  --page: #0a1322;
+  --card: #0f1b2d;
+  --card-2: #16253b;
+  --fg: #e6edf7;
+  --muted: #a3b3c9;
+  --subtle: #6b7c94;
+  --line: #1f3049;
+  --accent: #3987e5;
+  --st-reported: #c98500;
+  --st-progress: #3987e5;
+  --st-resolved: #0ca30c;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-st-reported: var(--st-reported);
+  --color-st-progress: var(--st-progress);
+  --color-st-resolved: var(--st-resolved);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Leaflet popups follow the site theme */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--card);
+  color: var(--fg);
+}
+.leaflet-container {
+  font-family: inherit;
+  background: var(--card-2);
+}
+
+/* Darken the OpenStreetMap tiles in dark mode */
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
+}
