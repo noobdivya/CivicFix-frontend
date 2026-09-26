@@ -60,7 +60,7 @@ export type IssueDetail = StaffIssue & {
   startedAt: string | null;
   resolvedAt: string | null;
   rejectionReason: string | null;
-  reporter: { name: string | null; phone: string | null; aadhaarLast4: string | null } | null;
+  reporter: { name: string | null; phone: string | null } | null;
   photos: Photo[];
   events: IssueEvent[];
 };

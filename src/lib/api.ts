@@ -139,6 +139,6 @@ export const api = {
   sendContact: (input: ContactInput) =>
     request<{ id: number; message: string }>("/api/contact", { method: "POST", body: JSON.stringify(input) }),
   categories: () => request<Category[]>("/api/categories"),
-  /** Multipart form: category, name, phone, aadhaar, description, address, area, lat, lng, consent, photo. */
+  /** Multipart form: category, name, phone, description, address, area, lat, lng, consent, photo. */
   submitIssue: (form: FormData) => request<CreatedIssue>("/api/issues", { method: "POST", body: form }),
 };

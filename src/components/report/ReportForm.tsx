@@ -1,27 +1,26 @@
 "use client";
 
-import { AlertTriangle, ArrowLeft, Eye, EyeOff, Loader2, Lock, Send } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Loader2, Lock, Send } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { api, ApiError, type Category, type CreatedIssue, type Place } from "@/lib/api";
 import { CategoryIcon } from "@/lib/categories";
-import { digitsOnly, formatAadhaar, isValidAadhaar, normalizeIndianMobile } from "@/lib/validation";
+import { normalizeIndianMobile } from "@/lib/validation";
 import { LocationPicker } from "./LocationPicker";
 import type { Photo } from "./PhotoInput";
 import { MAX_REPORT_PHOTOS, PhotosInput } from "./PhotosInput";
 import { StepIndicator } from "./StepIndicator";
 import { SubmitSuccess } from "./SubmitSuccess";
 
-type FieldKey = "name" | "phone" | "aadhaar" | "description" | "photo" | "location" | "address" | "consent";
+type FieldKey = "name" | "phone" | "description" | "photo" | "location" | "address" | "consent";
 type Errors = Partial<Record<FieldKey | "category", string>>;
 
 // Order used to scroll to the first invalid field.
-const fieldOrder: FieldKey[] = ["name", "phone", "aadhaar", "description", "photo", "location", "address", "consent"];
+const fieldOrder: FieldKey[] = ["name", "phone", "description", "photo", "location", "address", "consent"];
 
 type Values = {
   name: string;
   phone: string;
-  aadhaar: string;
   description: string;
   address: string;
   photos: Photo[];
@@ -34,7 +33,6 @@ function validate(v: Values): Errors {
   const name = v.name.trim();
   if (name.length < 2 || name.length > 100) e.name = "Enter your full name.";
   if (!normalizeIndianMobile(v.phone)) e.phone = "Enter a valid 10-digit Indian mobile number.";
-  if (!isValidAadhaar(v.aadhaar)) e.aadhaar = "Enter a valid 12-digit Aadhaar number.";
   const d = v.description.trim().length;
   if (d < 20) e.description = "Please describe the issue in at least 20 characters.";
   else if (d > 2000) e.description = "Keep the description under 2000 characters.";
@@ -81,7 +79,6 @@ export function ReportForm({ slug }: { slug: string }) {
   const [values, setValues] = useState<Values>({
     name: "",
     phone: "",
-    aadhaar: "",
     description: "",
     address: "",
     photos: [],
@@ -89,7 +86,6 @@ export function ReportForm({ slug }: { slug: string }) {
     consent: false,
   });
   const [area, setArea] = useState("");
-  const [showAadhaar, setShowAadhaar] = useState(true);
   const addressTouched = useRef(false);
 
   const [errors, setErrors] = useState<Errors>({});
@@ -152,7 +148,6 @@ export function ReportForm({ slug }: { slug: string }) {
     fd.set("category", slug);
     fd.set("name", values.name.trim());
     fd.set("phone", normalizeIndianMobile(values.phone) ?? "");
-    fd.set("aadhaar", digitsOnly(values.aadhaar));
     fd.set("description", values.description.trim());
     fd.set("address", values.address.trim());
     fd.set("area", area);
@@ -261,33 +256,6 @@ export function ReportForm({ slug }: { slug: string }) {
               </div>
             </Field>
           </div>
-          <Field
-            name="aadhaar"
-            label="Aadhaar number (identity proof)"
-            hint="We only keep the last 4 digits — your full Aadhaar number is never stored."
-            error={errors.aadhaar}
-          >
-            <div className="relative">
-              <input
-                value={showAadhaar ? values.aadhaar : values.aadhaar.replace(/\d(?=.*\d{4}$)/g, "•")}
-                onChange={(e) => showAadhaar && set("aadhaar", formatAadhaar(e.target.value))}
-                readOnly={!showAadhaar}
-                className={`${inputBase} pr-11 font-mono tracking-wider ${errors.aadhaar ? "border-rose-500" : "border-line"}`}
-                placeholder="XXXX XXXX XXXX"
-                inputMode="numeric"
-                autoComplete="off"
-                maxLength={14}
-              />
-              <button
-                type="button"
-                onClick={() => setShowAadhaar((s) => !s)}
-                className="absolute right-2 top-1/2 mt-[3px] -translate-y-1/2 rounded p-1.5 text-muted hover:text-fg"
-                aria-label={showAadhaar ? "Hide Aadhaar number" : "Show Aadhaar number"}
-              >
-                {showAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-          </Field>
         </Section>
 
         <Section step={2} title="About the issue">
@@ -341,7 +309,7 @@ export function ReportForm({ slug }: { slug: string }) {
               />
               <span>
                 I confirm the information above is true, and I consent to CivicFix and the municipal authority using my
-                name, phone number and Aadhaar details to verify and process this complaint.
+                name and phone number to process this complaint.
               </span>
             </label>
             {errors.consent && <p className="mt-1 pl-7 text-xs text-rose-500">{errors.consent}</p>}

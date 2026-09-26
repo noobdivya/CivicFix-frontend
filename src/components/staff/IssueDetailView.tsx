@@ -1,6 +1,6 @@
 "use client";
 
-import { AlarmClock, ArrowLeft, Building2, Calendar, Fingerprint, MapPin, Phone, Tag, UserRound } from "lucide-react";
+import { AlarmClock, ArrowLeft, Building2, Calendar, MapPin, Phone, Tag, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { MiniMap } from "@/components/ui/MiniMap";
@@ -142,9 +142,6 @@ export function IssueDetailView({ id, role }: { id: number; role: Role }) {
                     +91 {issue.reporter.phone}
                   </a>
                 </Row>
-              )}
-              {issue.reporter.aadhaarLast4 && (
-                <Row icon={<Fingerprint className="size-4" />} label="Aadhaar">XXXX XXXX {issue.reporter.aadhaarLast4}</Row>
               )}
             </section>
           )}

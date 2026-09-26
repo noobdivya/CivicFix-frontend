@@ -64,7 +64,7 @@ export function ReportIssue() {
           >
             Report an issue <ArrowRight className="size-4" />
           </Link>
-          <p className="text-sm text-blue-50">No account needed — just your name, mobile number and Aadhaar for verification.</p>
+          <p className="text-sm text-blue-50">No account needed — just your name and mobile number.</p>
         </div>
       </div>
     </section>

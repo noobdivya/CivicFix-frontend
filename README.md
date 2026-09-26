@@ -64,7 +64,7 @@ The backend runs on Render with a Neon database (see the [backend README](https:
 | Route | Page |
 |---|---|
 | `/` | Landing page: map of all issues (centred on your location) and dashboard statistics with a **dashboard filter: area + radius (15 km default), status, category, time** — the filter changes the statistics only, not the map (area remembered per browser); report/track entry points, officials' messages, contact |
-| `/report` → `/report/[category]` | Report an issue: choose category → details, **up to 2 photos**, map pin, Aadhaar → tracking ID |
+| `/report` → `/report/[category]` | Report an issue: choose category → details, **up to 2 photos**, map pin → tracking ID |
 | `/track` | Track a complaint with tracking ID + mobile number: progress, timeline, before/after photos |
 
 **Staff** (sign in at `/login`)
