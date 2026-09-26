@@ -2,6 +2,8 @@
 
 Web app for **CivicFix**, a civic issue platform connecting citizens, municipal departments, field workers and administrators.
 
+**Live site:** [civic-fix-eight-delta.vercel.app](https://civic-fix-eight-delta.vercel.app/)
+
 Backend: [CivicFix-Backend](https://github.com/noobdivya/CivicFix-Backend)
 
 ## Screenshots
