@@ -4,6 +4,31 @@ Web app for **CivicFix**, a civic issue platform connecting citizens, municipal 
 
 Backend: [CivicFix-Backend](https://github.com/noobdivya/CivicFix-Backend)
 
+## Screenshots
+
+**Landing page: live dashboard and issue map** (dark and light themes)
+
+![Landing page, dark theme](docs/screenshots/landing-dark.png)
+![Landing page, light theme](docs/screenshots/landing-light.png)
+
+<details>
+<summary>Full landing page</summary>
+
+![Full landing page](docs/screenshots/landing-full.png)
+</details>
+
+**Report an issue**: choose a category, then add details, photos and a map pin
+
+| Choose category | Issue details |
+|---|---|
+| ![Choose a category](docs/screenshots/report-categories.png) | ![Report form](docs/screenshots/report-form.png) |
+
+**Track a complaint** and **staff login**
+
+| Track complaint | Staff login |
+|---|---|
+| ![Track a complaint](docs/screenshots/track.png) | ![Staff login](docs/screenshots/login.png) |
+
 ## Tech stack
 - Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4 (dark + light themes)
 - Leaflet + OpenStreetMap tiles (no API key); lucide-react icons; hand-built SVG charts
@@ -21,7 +46,16 @@ npm run dev                   # http://localhost:3000
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` | Base URL of the CivicFix API |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` in dev, same origin in production | Base URL the browser uses for the CivicFix API |
+| `BACKEND_URL` | *(unset)* | Production only: `/api/*` and `/uploads/*` are forwarded here (see [next.config.ts](next.config.ts)) |
+
+## Deployment (Vercel)
+
+The backend runs on Render with a Neon database (see the [backend README](https://github.com/noobdivya/CivicFix-Backend#deployment-render--neon)). On Vercel, the browser calls `/api/...` on the frontend's own domain and Next.js forwards the request to the backend. This keeps the staff session cookie first-party, which a direct cross-site call from `vercel.app` to `onrender.com` would not.
+
+1. In Vercel, choose *Add New → Project* and import this repository. The framework (Next.js) is detected automatically.
+2. Add one environment variable: `BACKEND_URL` = your Render URL, e.g. `https://civicfix-api.onrender.com`. Do **not** set `NEXT_PUBLIC_API_URL`.
+3. Deploy. Then set the backend's `CORS_ALLOWED_ORIGINS` to the Vercel URL.
 
 ## Pages
 
