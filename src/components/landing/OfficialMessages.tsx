@@ -25,6 +25,9 @@ export function OfficialMessages() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
+  // Hide the whole section until real messages have been added.
+  if (messages && messages.length === 0) return null;
+
   return (
     <section id="messages" className="scroll-mt-16 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">

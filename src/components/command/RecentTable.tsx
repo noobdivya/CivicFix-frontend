@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { DashboardData } from "@/lib/api";
 import { groupOf, statusGroups, statusLabel, timeAgo } from "@/lib/status";
 import { EmptyChart, Panel } from "./Panel";
@@ -18,9 +19,9 @@ export function RecentTable({ issues }: { issues: DashboardData["recentIssues"] 
       {issues.length === 0 ? (
         <EmptyChart>
           No issues reported yet.{" "}
-          <a href="#report" className="ml-1 font-medium text-accent hover:underline">
+          <Link href="/report" className="ml-1 font-medium text-accent hover:underline">
             Report one →
-          </a>
+          </Link>
         </EmptyChart>
       ) : (
         <div className="-mx-4 overflow-x-auto px-4">

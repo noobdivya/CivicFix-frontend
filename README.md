@@ -1,16 +1,13 @@
 # CivicFix — Frontend
 
-Web app for **CivicFix**, a civic issue reporting and management platform connecting citizens, municipal departments, field workers and administrators.
+Web app for **CivicFix**, a civic issue platform connecting citizens, municipal departments, field workers and administrators.
 
 Backend: [CivicFix-Backend](https://github.com/noobdivya/CivicFix-Backend)
 
-**Current status:** Feature 1 — Landing page (live dashboard, map, contact form).
-
 ## Tech stack
-- Next.js 16 (App Router), React 19, TypeScript
-- Tailwind CSS v4 — dark (default) and light themes
-- Leaflet + OpenStreetMap tiles (no API key)
-- lucide-react icons; charts are hand-built SVG
+- Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4 (dark + light themes)
+- Leaflet + OpenStreetMap tiles (no API key); lucide-react icons; hand-built SVG charts
+- Plain REST: data loads when a page opens and when the user clicks Refresh (no real-time/background updates)
 
 ## Getting started
 
@@ -26,6 +23,28 @@ npm run dev                   # http://localhost:3000
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8080` | Base URL of the CivicFix API |
 
+## Pages
+
+**Public / citizens** (no account)
+
+| Route | Page |
+|---|---|
+| `/` | Landing page: map of all issues (centred on your location) and dashboard statistics with a **dashboard filter: area + radius (15 km default), status, category, time** — the filter changes the statistics only, not the map (area remembered per browser); report/track entry points, officials' messages, contact |
+| `/report` → `/report/[category]` | Report an issue: choose category → details, **up to 2 photos**, map pin, Aadhaar → tracking ID |
+| `/track` | Track a complaint with tracking ID + mobile number: progress, timeline, before/after photos |
+
+**Staff** (sign in at `/login`)
+
+| Route | Who | Page |
+|---|---|---|
+| `/department` · `/department/issues/[id]` | Department officers | Issue queue; review, prioritise, assign, reject, reopen, transfer, notes |
+| `/worker` · `/worker/tasks/[id]` | Field workers | My tasks; start work, notes, resolve with completion photo, directions |
+| `/admin` | Admins | City overview: department performance, recurring problem spots, resolution times, city map, field worker output |
+| `/admin/issues` · `/admin/issues/[id]` | Admins | All issues across departments |
+| `/admin/users` | Admins | Create staff accounts, change roles/departments, reset passwords, deactivate |
+
+All staff pages have a notification bell (new complaints, assignments, progress, resolutions), loaded when the page opens or the bell is clicked.
+
 ## Scripts
 
 | Command | Description |
@@ -35,19 +54,16 @@ npm run dev                   # http://localhost:3000
 | `npm run start` | Serve the production build |
 | `npm run lint` | Lint |
 
-## Landing page
-
-- **Header** — logo, navigation, live clock, system status (`/api/health`), theme toggle
-- **Live dashboard** — KPI tiles, map with status layers & filters, resolution gauge, issues by category, hotspot areas, 14-day trend, recent reports, status distribution, activity feed (refreshes every 30 s)
-- **Report an issue**, **login portals** (citizen / worker / admin), **messages from officials**, **about**, **contact form**
-
 ## Project structure
 
 ```
-src/app/                    layout, page, global styles, favicon
-src/components/command/     header + live dashboard panels
-src/components/landing/     landing sections, map (map/)
-src/lib/api.ts              all backend calls & types
-src/lib/status.ts           issue status colours & labels
-src/lib/theme.ts            light/dark theme hook
+src/app/                    routes (landing, report, track, login, department, worker, admin)
+src/components/command/     header + landing dashboard
+src/components/landing/     landing sections, public map
+src/components/report/      report-an-issue flow
+src/components/track/       complaint tracking
+src/components/staff/       staff shell, issue queue & detail, actions, notifications
+src/components/admin/       admin overview & staff management
+src/components/ui/          badges, timeline, mini map
+src/lib/                    API clients, auth context, validation, formatting, theme
 ```

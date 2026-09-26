@@ -1,20 +1,25 @@
-import { ArrowRight, Camera, CircleAlert, Construction, Droplets, Lightbulb, MapPin, Send, Tags, TrafficCone, Trash2 } from "lucide-react";
+import { ArrowRight, Camera, MapPin, Send, Tags } from "lucide-react";
+import Link from "next/link";
+import { CategoryIcon } from "@/lib/categories";
 import { SectionHeading } from "./SectionHeading";
 
 const steps = [
-  { icon: Camera, title: "Take a photo", text: "Capture the problem clearly so the team knows what to fix." },
-  { icon: MapPin, title: "Pin the location", text: "Use your current location or drop a pin on the map." },
-  { icon: Tags, title: "Choose a category", text: "Your report goes straight to the responsible department." },
-  { icon: Send, title: "Submit & track", text: "Get a complaint ID and updates until it's resolved." },
+  { icon: Tags, title: "Choose a category", text: "Pick the type of problem — it goes straight to the responsible department." },
+  { icon: Camera, title: "Describe & add a photo", text: "Tell us what's wrong and snap a clear photo of the spot." },
+  { icon: MapPin, title: "Pin the location", text: "Use your current location or tap the exact spot on the map." },
+  { icon: Send, title: "Submit & get a tracking ID", text: "You get a tracking ID instantly to follow up on your complaint." },
 ];
 
-const categories = [
-  { icon: CircleAlert, name: "Potholes" },
-  { icon: Lightbulb, name: "Streetlights" },
-  { icon: Trash2, name: "Garbage" },
-  { icon: Droplets, name: "Water leakage" },
-  { icon: Construction, name: "Damaged roads" },
-  { icon: TrafficCone, name: "Traffic signals" },
+// Shortcuts straight to the form for the most common categories.
+const quickCategories = [
+  { slug: "pothole", name: "Potholes", icon: "pothole" },
+  { slug: "road-damage", name: "Road problems", icon: "road" },
+  { slug: "electricity", name: "Electricity", icon: "electricity" },
+  { slug: "streetlight", name: "Streetlights", icon: "streetlight" },
+  { slug: "drainage", name: "Drainage", icon: "drainage" },
+  { slug: "waterlogging", name: "Waterlogging", icon: "waterlogging" },
+  { slug: "garbage", name: "Garbage", icon: "garbage" },
+  { slug: "other", name: "Other", icon: "other" },
 ];
 
 export function ReportIssue() {
@@ -42,19 +47,24 @@ export function ReportIssue() {
 
         <div className="mt-10 flex flex-col items-center gap-6 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 px-6 py-10 text-center text-white">
           <ul className="flex flex-wrap justify-center gap-2">
-            {categories.map(({ icon: Icon, name }) => (
-              <li key={name} className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm">
-                <Icon className="size-4" /> {name}
-              </li>
+            {quickCategories.map((c) => (
+                <li key={c.slug}>
+                  <Link
+                    href={`/report/${c.slug}`}
+                    className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm transition-colors hover:bg-white/25"
+                  >
+                    <CategoryIcon icon={c.icon} className="size-4" /> {c.name}
+                  </Link>
+                </li>
             ))}
           </ul>
-          <a
-            href="#login"
+          <Link
+            href="/report"
             className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-blue-700 shadow-sm transition-colors hover:bg-blue-50"
           >
             Report an issue <ArrowRight className="size-4" />
-          </a>
-          <p className="text-sm text-blue-50">Log in as a citizen to submit and track your reports.</p>
+          </Link>
+          <p className="text-sm text-blue-50">No account needed — just your name, mobile number and Aadhaar for verification.</p>
         </div>
       </div>
     </section>

@@ -48,6 +48,7 @@ export function timeAgo(iso: string): string {
 
 export function formatHours(hours: number | null): string {
   if (hours === null) return "—";
+  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))} min`;
   if (hours < 24) return `${Math.round(hours)} h`;
   return `${(hours / 24).toFixed(1)} days`;
 }

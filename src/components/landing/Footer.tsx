@@ -1,12 +1,13 @@
+import Link from "next/link";
 import { Logo } from "./Logo";
 
 const links = [
-  { href: "#home", label: "Home" },
-  { href: "#dashboard", label: "Dashboard" },
-  { href: "#report", label: "Report an issue" },
-  { href: "#login", label: "Log in" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#home", label: "Home" },
+  { href: "/report", label: "Report an issue" },
+  { href: "/track", label: "Track complaint" },
+  { href: "/login", label: "Staff login" },
+  { href: "/#about", label: "About" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export function Footer() {
@@ -18,9 +19,9 @@ export function Footer() {
           <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted">
             {links.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="hover:text-fg">
+                <Link href={l.href} className="hover:text-fg">
                   {l.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

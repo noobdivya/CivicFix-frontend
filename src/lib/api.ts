@@ -46,6 +46,30 @@ export type MapIssue = {
 
 export type Place = { area: string; city: string; state: string; displayName: string };
 
+export type SearchResult = { name: string; displayName: string; lat: number; lng: number };
+
+/** Filters for the public dashboard and map. Empty = everything, city-wide. */
+export type DashboardFilter = {
+  area?: { lat: number; lng: number; radiusKm: number } | null;
+  statuses?: ("reported" | "progress" | "resolved")[];
+  category?: string;
+  sinceDays?: number;
+};
+
+function filterQuery(f: DashboardFilter = {}): string {
+  const p = new URLSearchParams();
+  if (f.area) {
+    p.set("lat", f.area.lat.toFixed(5));
+    p.set("lng", f.area.lng.toFixed(5));
+    p.set("radiusKm", String(f.area.radiusKm));
+  }
+  if (f.statuses && f.statuses.length > 0 && f.statuses.length < 3) p.set("status", f.statuses.join(","));
+  if (f.category) p.set("category", f.category);
+  if (f.sinceDays) p.set("sinceDays", String(f.sinceDays));
+  const q = p.toString();
+  return q ? `?${q}` : "";
+}
+
 export type OfficialMessage = {
   id: number;
   name: string;
@@ -57,6 +81,19 @@ export type OfficialMessage = {
 
 export type ContactInput = { name: string; email: string; subject: string; message: string };
 
+export type Category = { slug: string; name: string; description: string; icon: string };
+
+export type CreatedIssue = {
+  id: number;
+  trackingCode: string;
+  status: IssueStatus;
+  category: string;
+  title: string;
+  address: string;
+  photoUrls: string[];
+  createdAt: string;
+};
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -67,17 +104,21 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+/** Calls the CivicFix API. Sends the staff session cookie; throws ApiError on failure. */
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
       ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      credentials: "include",
+      // JSON bodies need the header; FormData sets its own multipart boundary.
+      headers: typeof init?.body === "string" ? { "Content-Type": "application/json", ...init?.headers } : init?.headers,
     });
   } catch {
     throw new ApiError("Cannot reach the CivicFix server. Is the backend running?", 0);
   }
 
+  if (res.status === 204) return undefined as T;
   const body = await res.json().catch(() => ({}));
   if (!res.ok && !(res.status === 503 && path === "/api/health")) {
     throw new ApiError(body.error ?? `Request failed (${res.status})`, res.status, body.fields ?? {});
@@ -87,11 +128,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<Health>("/api/health"),
-  dashboard: () => request<DashboardData>("/api/dashboard"),
+  dashboard: (f?: DashboardFilter) => request<DashboardData>(`/api/dashboard${filterQuery(f)}`),
   mapDefault: () => request<MapDefault>("/api/map/default"),
   mapIssues: () => request<MapIssue[]>("/api/map/issues"),
+  searchPlaces: (q: string) => request<SearchResult[]>(`/api/geo/search?q=${encodeURIComponent(q)}`),
   reverseGeocode: (lat: number, lng: number) => request<Place>(`/api/geo/reverse?lat=${lat}&lng=${lng}`),
   officialMessages: () => request<OfficialMessage[]>("/api/officials/messages"),
   sendContact: (input: ContactInput) =>
     request<{ id: number; message: string }>("/api/contact", { method: "POST", body: JSON.stringify(input) }),
+  categories: () => request<Category[]>("/api/categories"),
+  /** Multipart form: category, name, phone, aadhaar, description, address, area, lat, lng, consent, photo. */
+  submitIssue: (form: FormData) => request<CreatedIssue>("/api/issues", { method: "POST", body: form }),
 };

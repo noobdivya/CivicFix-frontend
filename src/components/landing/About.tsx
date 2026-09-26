@@ -11,8 +11,8 @@ const problems = [
 
 const features = [
   { icon: Users, title: "One shared system", text: "Citizens, departments, supervisors and field workers work on the same issue record." },
-  { icon: Map, title: "Live map", text: "Every open issue across wards and neighbourhoods, plotted in real time." },
-  { icon: BellRing, title: "Notifications", text: "Everyone is updated automatically whenever an issue changes status." },
+  { icon: Map, title: "City map", text: "Every open issue across wards and neighbourhoods, plotted on one map." },
+  { icon: BellRing, title: "Notifications", text: "Every status change is recorded and shown to citizens and staff." },
   { icon: Clock, title: "Resolution tracking", text: "Every step is timestamped, so you know exactly how long each fix takes." },
   { icon: Repeat, title: "Recurring hotspots", text: "Spot locations where the same problems keep coming back." },
   { icon: BarChart3, title: "Admin dashboard", text: "A centralized overview of civic issues across different areas." },

@@ -3,10 +3,12 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LiveMap } from "@/components/landing/map/LiveMap";
-import { api, type DashboardData, type MapIssue } from "@/lib/api";
-import { groupOf, timeAgo, type StatusGroup } from "@/lib/status";
+import { api, type Category, type DashboardData, type DashboardFilter, type MapIssue } from "@/lib/api";
+import { loadPreferredArea, savePreferredArea } from "@/lib/preferred-area";
+import { groupOf, statusGroups, timeAgo, type StatusGroup } from "@/lib/status";
 import { ActivityFeed } from "./ActivityFeed";
 import { CategoryBars } from "./CategoryBars";
+import { DashboardFilters, type Filters } from "./DashboardFilters";
 import { HotspotBars } from "./HotspotBars";
 import { KpiTiles } from "./KpiTiles";
 import { MapFilters, type DraftFilters, type Layers } from "./MapFilters";
@@ -15,12 +17,18 @@ import { ResolutionGauge } from "./ResolutionGauge";
 import { StatusDonut } from "./StatusDonut";
 import { TrendChart } from "./TrendChart";
 
-const REFRESH_MS = 30_000;
-
 type AppliedFilters = { category: string; since: number | null };
 
-/** The live dashboard at the top of the landing page: KPIs, map, charts and activity. */
+/**
+ * The dashboard at the top of the landing page: KPIs, map, charts and activity.
+ * Data is fetched when the page loads, when the dashboard filter changes and
+ * when the user clicks Refresh (no automatic background updates).
+ * The dashboard filter (area + radius, status, category, time) only changes the
+ * statistics; the map keeps its own behaviour and filters.
+ */
 export function CommandCenter() {
+  const [dash, setDash] = useState<Filters>({ area: null, statuses: statusGroups.map((g) => g.key), category: "", sinceDays: 0 });
+  const [categories, setCategories] = useState<Category[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [mapIssues, setMapIssues] = useState<MapIssue[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,20 +37,46 @@ export function CommandCenter() {
   const [draft, setDraft] = useState<DraftFilters>({ category: "all", range: "all" });
   const [applied, setApplied] = useState<AppliedFilters>({ category: "all", since: null });
 
+  // Restore the viewer's preferred dashboard area; load category names.
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      const saved = loadPreferredArea();
+      if (saved) setDash((d) => ({ ...d, area: saved }));
+    });
+    api
+      .categories()
+      .then(setCategories)
+      .catch(() => {});
+  }, []);
+
+  const dashQuery: DashboardFilter = useMemo(
+    () => ({
+      area: dash.area,
+      statuses: dash.statuses,
+      category: dash.category || undefined,
+      sinceDays: dash.sinceDays || undefined,
+    }),
+    [dash],
+  );
+
+  const onDashChange = (f: Filters) => {
+    if (f.area !== dash.area) savePreferredArea(f.area);
+    setDash(f);
+  };
+
   const load = useCallback(() => {
-    Promise.all([api.dashboard(), api.mapIssues()])
+    // The dashboard statistics follow the dashboard filter; the map always gets all issues.
+    Promise.all([api.dashboard(dashQuery), api.mapIssues()])
       .then(([d, m]) => {
         setData(d);
         setMapIssues(m);
         setError(null);
       })
       .catch((e: Error) => setError(e.message));
-  }, []);
+  }, [dashQuery]);
 
   useEffect(() => {
     load();
-    const id = setInterval(load, REFRESH_MS);
-    return () => clearInterval(id);
   }, [load]);
 
   const applyFilters = () =>
@@ -78,7 +112,7 @@ export function CommandCenter() {
             Report it. Track it. <span className="text-accent">Get it fixed.</span>
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Live overview of civic issues — potholes, streetlights, garbage, water leaks, roads and traffic signals.
+            Overview of civic issues — potholes, streetlights, garbage, water leaks, roads and traffic signals.
           </p>
         </div>
         <p className="flex items-center gap-2 text-xs text-subtle">
@@ -89,21 +123,34 @@ export function CommandCenter() {
             </>
           ) : data ? (
             <>
-              <span className="size-2 animate-pulse rounded-full bg-st-resolved" />
-              Live · updated {timeAgo(data.updatedAt)}
+              Updated {timeAgo(data.updatedAt)}
             </>
           ) : (
-            "Loading live data…"
+            "Loading data…"
           )}
-          <button onClick={load} aria-label="Refresh data" className="rounded p-1 text-muted hover:bg-card-2 hover:text-fg">
-            <RefreshCw className="size-3.5" />
+          <button
+            onClick={load}
+            className="inline-flex items-center gap-1.5 rounded-md border border-line px-2 py-1 text-muted hover:bg-card-2 hover:text-fg"
+          >
+            <RefreshCw className="size-3.5" /> Refresh
           </button>
         </p>
       </div>
 
+      <DashboardFilters value={dash} onChange={onDashChange} categories={categories} />
+      <p className="-mt-2 px-1 text-xs text-subtle">
+        {dash.area ? `Statistics for issues within ${dash.area.radiusKm} km of ${dash.area.name}` : "Statistics for all areas"}
+        {dash.statuses.length < statusGroups.length &&
+          ` · ${statusGroups
+            .filter((g) => dash.statuses.includes(g.key))
+            .map((g) => g.label.toLowerCase())
+            .join(" & ")} only`}
+        . The map below is not affected by these filters.
+      </p>
+
       <KpiTiles stats={data?.stats ?? null} />
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid *:min-w-0 gap-4 lg:grid-cols-12">
         <div className="lg:col-span-3 xl:col-span-2">
           <MapFilters
             layers={layers}
@@ -120,7 +167,7 @@ export function CommandCenter() {
         <div className="lg:col-span-9 xl:col-span-5">
           <LiveMap issues={visible} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:col-span-12 xl:col-span-5">
+        <div className="grid *:min-w-0 gap-4 sm:grid-cols-2 lg:col-span-12 xl:col-span-5">
           {data ? (
             <>
               <ResolutionGauge stats={data.stats} />
@@ -134,7 +181,7 @@ export function CommandCenter() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid *:min-w-0 gap-4 lg:grid-cols-12">
         {data ? (
           <>
             <div className="lg:col-span-12 xl:col-span-5">

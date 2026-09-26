@@ -2,14 +2,18 @@
 
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { api, type Health } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { portalPath } from "@/lib/staff-api";
 
 const links = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#home", label: "Home" },
+  { href: "/track", label: "Track complaint" },
+  { href: "/#about", label: "About" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 type SystemState = "checking" | "normal" | "degraded" | "offline";
@@ -35,17 +39,14 @@ function useClock() {
   return now;
 }
 
+/** Checks the server once when the page loads (refresh the page to re-check). */
 function useSystemState(): SystemState {
   const [state, setState] = useState<SystemState>("checking");
   useEffect(() => {
-    const check = () =>
-      api
-        .health()
-        .then((h: Health) => setState(h.database === "up" ? "normal" : "degraded"))
-        .catch(() => setState("offline"));
-    check();
-    const id = setInterval(check, 30_000);
-    return () => clearInterval(id);
+    api
+      .health()
+      .then((h: Health) => setState(h.database === "up" ? "normal" : "degraded"))
+      .catch(() => setState("offline"));
   }, []);
   return state;
 }
@@ -54,12 +55,14 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const now = useClock();
   const system = systemLabel[useSystemState()];
+  const { user } = useAuth();
+  const account = user ? { href: portalPath[user.role], label: "My portal" } : { href: "/login", label: "Staff login" };
   const close = () => setOpen(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-card/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6">
-        <a href="#home" onClick={close} className="flex min-w-0 items-center gap-3" aria-label="CivicFix home">
+        <Link href="/" onClick={close} className="flex min-w-0 items-center gap-3" aria-label="CivicFix home">
           <Image src="/logo.png" alt="" width={36} height={36} className="size-9 shrink-0" priority />
           <span className="min-w-0 leading-tight">
             <span className="block text-base font-bold uppercase tracking-wide text-fg sm:text-lg">
@@ -67,13 +70,13 @@ export function Header() {
             </span>
             <span className="hidden truncate text-xs text-muted sm:block">Civic Issue Management Portal</span>
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-muted md:flex" aria-label="Main">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="transition-colors hover:text-fg">
+            <Link key={l.href} href={l.href} className="transition-colors hover:text-fg">
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -88,18 +91,18 @@ export function Header() {
             <span className={`size-2 rounded-full ${system.dot}`} /> {system.text}
           </span>
           <ThemeToggle />
-          <a
-            href="#login"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-fg hover:bg-card-2 sm:inline-block"
+          <Link
+            href={account.href}
+            className="hidden whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-fg hover:bg-card-2 sm:inline-block"
           >
-            Log in
-          </a>
-          <a
-            href="#report"
+            {account.label}
+          </Link>
+          <Link
+            href="/report"
             className="hidden rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-block"
           >
             Report an issue
-          </a>
+          </Link>
           <button
             type="button"
             className="grid size-9 place-items-center rounded-lg border border-line text-fg md:hidden"
@@ -115,21 +118,21 @@ export function Header() {
       {open && (
         <div className="border-t border-line bg-card px-4 py-3 md:hidden">
           <ul className="space-y-1">
-            {[...links, { href: "#login", label: "Log in" }].map((l) => (
+            {[...links, account].map((l) => (
               <li key={l.href}>
-                <a href={l.href} onClick={close} className="block rounded-lg px-3 py-2 text-fg hover:bg-card-2">
+                <Link href={l.href} onClick={close} className="block rounded-lg px-3 py-2 text-fg hover:bg-card-2">
                   {l.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
-          <a
-            href="#report"
+          <Link
+            href="/report"
             onClick={close}
             className="mt-2 block rounded-lg bg-blue-600 px-3 py-2 text-center font-semibold text-white"
           >
             Report an issue
-          </a>
+          </Link>
           <p className="mt-3 flex items-center gap-1.5 px-3 text-xs text-muted">
             <span className={`size-2 rounded-full ${system.dot}`} /> {system.text}
           </p>

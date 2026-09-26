@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Loader2, Megaphone, Phone, Send } from "lucide-react";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { api, ApiError, type ContactInput } from "@/lib/api";
 import { SectionHeading } from "./SectionHeading";
@@ -58,7 +59,7 @@ export function Contact() {
               <Megaphone className="size-6 text-accent" />
               <h3 className="mt-3 font-semibold text-fg">Want to report a civic issue?</h3>
               <p className="mt-1 text-sm text-muted">
-                Use <a href="#report" className="font-medium text-accent hover:underline">Report an issue</a> instead
+                Use <Link href="/report" className="font-medium text-accent hover:underline">Report an issue</Link> instead
                 — it goes straight to the right department and you can track it.
               </p>
             </div>
