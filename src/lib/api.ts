@@ -1,7 +1,7 @@
-// Base URL of the Go API (see .env.local). Production builds default to the
-// same origin, where next.config.ts forwards /api and /uploads to BACKEND_URL.
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:8080");
+// The browser always calls /api and /uploads on this site's own domain;
+// next.config.ts forwards them to the Go API. Calling the API's domain
+// directly would break staff login (its session cookie would be cross-site).
+export const API_URL = "";
 
 export type IssueStatus = "reported" | "assigned" | "in_progress" | "resolved" | "rejected";
 

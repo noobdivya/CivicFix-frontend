@@ -48,15 +48,14 @@ npm run dev                   # http://localhost:3000
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` in dev, same origin in production | Base URL the browser uses for the CivicFix API |
-| `BACKEND_URL` | *(unset)* | Production only: `/api/*` and `/uploads/*` are forwarded here (see [next.config.ts](next.config.ts)) |
+| `BACKEND_URL` | `http://localhost:8080` | Where the Go API runs. The browser calls `/api` and `/uploads` on this site and Next.js forwards them here (see [next.config.ts](next.config.ts)). `NEXT_PUBLIC_API_URL` is still accepted as a fallback. |
 
 ## Deployment (Vercel)
 
 The backend runs on Render with a Neon database (see the [backend README](https://github.com/noobdivya/CivicFix-Backend#deployment-render--neon)). On Vercel, the browser calls `/api/...` on the frontend's own domain and Next.js forwards the request to the backend. This keeps the staff session cookie first-party, which a direct cross-site call from `vercel.app` to `onrender.com` would not.
 
 1. In Vercel, choose *Add New → Project* and import this repository. The framework (Next.js) is detected automatically.
-2. Add one environment variable: `BACKEND_URL` = your Render URL, e.g. `https://civicfix-api.onrender.com`. Do **not** set `NEXT_PUBLIC_API_URL`.
+2. Add one environment variable: `BACKEND_URL` = your Render URL, e.g. `https://civicfix-backend-553k.onrender.com`.
 3. Deploy. Then set the backend's `CORS_ALLOWED_ORIGINS` to the Vercel URL.
 
 ## Pages
